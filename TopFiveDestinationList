@@ -1,0 +1,116 @@
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.border.*;
+
+public class TopFiveDestinationList {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TopDestinationListFrame topDestinationListFrame = new TopDestinationListFrame();
+                topDestinationListFrame.setTitle("Top 5 Destination List");
+                topDestinationListFrame.setVisible(true);
+            }
+        });
+    }
+}
+
+class TopDestinationListFrame extends JFrame {
+    private DefaultListModel<TextAndIcon> listModel;
+
+    public TopDestinationListFrame() {
+        super("Top Five Destination List");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(900, 750);
+
+        listModel = new DefaultListModel<>();
+
+        // Add destinations with their images
+        addDestinationNameAndPicture("1. Paris, France - The City of Light", createImageIcon("/resources/paris.jpeg"));
+        addDestinationNameAndPicture("2. Alaska, USA - The Last Frontier", createImageIcon("/resources/alaska.jpeg"));
+        addDestinationNameAndPicture("3. Cairo, Egypt - The Jewel of the Nile", createImageIcon("/resources/egypt.jpeg"));
+        addDestinationNameAndPicture("4. Tokyo, Japan - Land of the Rising Sun", createImageIcon("/resources/japan.jpeg"));
+        addDestinationNameAndPicture("5. New York, USA - The Big Apple", createImageIcon("/resources/new york.jpeg"));
+
+        JList<TextAndIcon> list = new JList<>(listModel);
+        JScrollPane scrollPane = new JScrollPane(list);
+        TextAndIconListCellRenderer renderer = new TextAndIconListCellRenderer(10);
+
+        list.setCellRenderer(renderer);
+
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+    }
+    // Helper method to add a text and image combination to the list model
+    private void addDestinationNameAndPicture(String text, ImageIcon icon) {
+        TextAndIcon tai = new TextAndIcon(text, icon);
+        listModel.addElement(tai);
+    }
+
+    // Method to create an ImageIcon while handling image resizing
+    // Utility method to create an ImageIcon after resizing it
+    private ImageIcon createImageIcon(String path) {
+        java.net.URL imgURL = getClass().getResource(path);
+        if (imgURL != null) {
+            ImageIcon icon = new ImageIcon(imgURL);
+            Image image = icon.getImage(); 
+            // Resize the image to the specified width and height
+            Image resizedImage = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            return new ImageIcon(resizedImage);
+        } else {
+            System.err.println("Couldn't find file: " + path);
+            return null;
+        }
+    }
+}
+
+class TextAndIcon {
+    private String text;
+    private Icon icon;
+
+    public TextAndIcon(String text, Icon icon) {
+        this.text = text;
+        this.icon = icon;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+}
+
+class TextAndIconListCellRenderer extends JLabel implements ListCellRenderer<Object> {
+    private static final Border NO_FOCUS_BORDER = new EmptyBorder(1, 1, 1, 1);
+
+    private Border insideBorder;
+
+    public TextAndIconListCellRenderer(int padding) {
+        insideBorder = BorderFactory.createEmptyBorder(padding, padding, padding, padding);
+        setOpaque(true);
+    }
+
+    @Override
+    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        TextAndIcon tai = (TextAndIcon) value;
+        setText(tai.getText());
+        setIcon(tai.getIcon());
+
+        if (isSelected) {
+            setBackground(list.getSelectionBackground());
+            setForeground(list.getSelectionForeground());
+        } else {
+            setBackground(list.getBackground());
+            setForeground(list.getForeground());
+        }
+
+        Border outsideBorder = cellHasFocus ? UIManager.getBorder("List.focusCellHighlightBorder") : NO_FOCUS_BORDER;
+        setBorder(BorderFactory.createCompoundBorder(outsideBorder, insideBorder));
+
+        setComponentOrientation(list.getComponentOrientation());
+        setEnabled(list.isEnabled());
+        setFont(list.getFont());
+
+        return this;
+    }
+}
